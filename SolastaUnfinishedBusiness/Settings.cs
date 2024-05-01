@@ -399,6 +399,7 @@ public class Settings : UnityModManager.ModSettings
     public int OutlineGridWidthSpeed { get; set; } = 100;
 
     public bool EnableDistanceOnTooltip { get; set; }
+    public bool EnablePauseInBattle { get; set; }
     public int HighContrastTargetingAoeSelectedColor { get; set; }
     public int HighContrastTargetingSingleSelectedColor { get; set; }
 

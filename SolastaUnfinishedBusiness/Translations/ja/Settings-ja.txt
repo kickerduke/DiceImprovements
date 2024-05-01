@@ -144,6 +144,7 @@ ModUi/&EnableSumD20OnAlternateVotingSystem=。また、各ヒーローは少し�
 ModUi/&EnableTeleportParty=<color=#1E81B0>CTRL-SHIFT-(T)</color> を有効にしてパーティをテレポートします。<i><color=#F0DAA0>[未発見の場所にテレポートするとクエストが中断される可能性があります]</color></i>
 ModUi/&EnableTogglesToOverwriteDefaultTestParty=キャラクタープールの切り替えを有効にして、デフォルトのプレイおよびテストパーティーを設定します
 ModUi/&EnableTooltipDistance=戦闘中にキャラクターの上にマウスを置いたときにツールチップに距離を表示できるようになります
+ModUi/&EnablePauseInBattle=戦闘中に一時停止ボタンを有効にする
 ModUi/&EnableUpcastConjureElementalAndFey=<color=#D89555>コンジュア・エレメンタル</color>と<color=#D89555>コンジュア・フェイ</color>のアップキャストを有効にする
 ModUi/&EnableVttCamera=<color=#1E81B0>CTRL-SHIFT-(V)</color> を有効にして VTT カメラを切り替えます<i><color=#F0DAA0>[右クリックしてドラッグしてカメラの位置を決め、WASD でパンと Page Up/ページダウンしてズーム]</color></i>
 ModUi/&EnablesAsiAndFeat=属性スコアの増加と特技の選択の両方を有効にします<i><color=#F0DAA0>[排他的な選択肢の代わりに]</color></i>

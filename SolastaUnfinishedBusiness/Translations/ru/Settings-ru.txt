@@ -144,6 +144,7 @@ ModUi/&EnableSumD20OnAlternateVotingSystem=<i>+ Также каждый геро
 ModUi/&EnableTeleportParty=Включить телепорт группы по нажатию <color=#1E81B0>CTRL-SHIFT-(T)</color> <i><color=#F0DAA0>[вы можете сломать квесты, если телепортируетесь в ещё не открытую область]</color></i>
 ModUi/&EnableTogglesToOverwriteDefaultTestParty=Включить в списке персонажей возможность выбирать группу по умолчанию
 ModUi/&EnableTooltipDistance=Включить отображение расстояния во всплывающей подсказке панели при наведении курсора на персонажа в бою
+ModUi/&EnablePauseInBattle=Включить кнопку паузы в бою
 ModUi/&EnableUpcastConjureElementalAndFey=Включить возможность накладывать на высоких уровнях <color=#D89555>Призыв элементаля</color> и <color=#D89555>Призыв феи</color>
 ModUi/&EnableVttCamera=Включать камеру виртуальной настольной игры по нажатию <color=#1E81B0>CTRL-SHIFT-(V)</color> <i><color=#F0DAA0>[позиционирование камеры правой кнопкой мыши, WASD для панорамного вида и зум по нажатию Page Up/Page Down]</color></i>
 ModUi/&EnablesAsiAndFeat=Включить возможность и повышать характеристики, и выбирать <color=#D89555>черту</color> одновременно <i><color=#F0DAA0>[вместо того, чтобы делать выбор между этими вариантами]</color></i>

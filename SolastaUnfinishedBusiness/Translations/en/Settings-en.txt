@@ -144,6 +144,7 @@ ModUi/&EnableSumD20OnAlternateVotingSystem=<i>+ Also each hero adds a D20 roll t
 ModUi/&EnableTeleportParty=Enable <color=#1E81B0>CTRL-SHIFT-(T)</color> to teleport the party <i><color=#F0DAA0>[you might break quests if you teleport to an undiscovered place]</color></i>
 ModUi/&EnableTogglesToOverwriteDefaultTestParty=Enable toggles on character pool to set your default play and test party
 ModUi/&EnableTooltipDistance=Enable showing distance on tooltips when hovering over a character in combat
+ModUi/&EnablePauseInBattle=Enable pause button in combat
 ModUi/&EnableUpcastConjureElementalAndFey=Enable upcast of <color=#D89555>Conjure Elemental</color> and <color=#D89555>Conjure Fey</color>
 ModUi/&EnableVttCamera=Enable <color=#1E81B0>CTRL-SHIFT-(V)</color> to toggle the VTT camera <i><color=#F0DAA0>[right-click and drag to position the camera, WASD to pan and Page Up/Page Down to zoom]</color></i>
 ModUi/&EnablesAsiAndFeat=Enable both attribute scores increase and <color=#D89555>feats</color> selection <i><color=#F0DAA0>[instead of an exclusive choice]</color></i>

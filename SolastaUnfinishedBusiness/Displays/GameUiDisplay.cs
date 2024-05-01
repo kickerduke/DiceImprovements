@@ -305,6 +305,12 @@ internal static class GameUiDisplay
             Main.Settings.EnableDistanceOnTooltip = toggle;
         }
 
+        toggle = Main.Settings.EnablePauseInBattle;
+        if (UI.Toggle(Gui.Localize("ModUi/&EnablePauseInBattle"), ref toggle))
+        {
+            Main.Settings.EnablePauseInBattle = toggle;
+        }
+
         UI.Label();
 
         var color = GameUiContext.HighContrastColorStrings[Main.Settings.HighContrastTargetingAoeSelectedColor];
