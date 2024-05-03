@@ -63,22 +63,5 @@ public static class AiLocationDefinitionsPatcher
                 ? DatabaseHelper.ConditionDefinitions.ConditionDarkness
                 : conditionForm.ConditionDefinition;
         }
-
-        [UsedImplicitly]
-        public static void Postfix(
-            ref bool __result,
-            AiLocationCharacter aiCharacter,
-            IMagicEffect magicEffect,
-            GameLocationCharacter optionalTarget)
-        {
-            var locationCharacter = aiCharacter.GameLocationCharacter;
-
-            if (__result &&
-                !LightingAndObscurementContext.IsMagicEffectValidIfHeavilyObscuredOrInNaturalDarkness(
-                    locationCharacter, magicEffect, optionalTarget))
-            {
-                __result = false;
-            }
-        }
     }
 }

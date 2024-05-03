@@ -613,8 +613,30 @@ internal static class RaceFeats
     private sealed class CustomBehaviorBountifulLuck(
         // ReSharper disable once SuggestBaseTypeForParameterInConstructor
         ConditionDefinition conditionBountifulLuck)
-        : ITryAlterOutcomeAttack, ITryAlterOutcomeAttributeCheck, ITryAlterOutcomeSavingThrow
+        : ITryAlterOutcomeAttack, ITryAlterOutcomeAttributeCheck, ITryAlterOutcomeSavingThrow, IRollSavingThrowFinished
     {
+        private int _modifier;
+        private int _saveDC;
+
+        public void OnSavingThrowFinished(
+            RulesetCharacter caster,
+            RulesetCharacter defender,
+            int saveBonus,
+            string abilityScoreName,
+            BaseDefinition sourceDefinition,
+            List<TrendInfo> modifierTrends,
+            List<TrendInfo> advantageTrends,
+            int rollModifier,
+            int saveDC,
+            bool hasHitVisual,
+            ref RollOutcome outcome,
+            ref int outcomeDelta,
+            List<EffectForm> effectForms)
+        {
+            _saveDC = saveDC;
+            _modifier = saveBonus + rollModifier;
+        }
+
         public IEnumerator OnTryAlterOutcomeAttack(
             GameLocationBattleManager battleManager,
             CharacterAction action,
@@ -661,11 +683,6 @@ internal static class RaceFeats
 
             var rulesetHelper = helper.RulesetCharacter;
             var dieRoll = rulesetHelper.RollDie(DieType.D20, RollContext.None, false, AdvantageType.None, out _, out _);
-
-            if (dieRoll < action.AttackRoll)
-            {
-                yield break;
-            }
 
             action.AttackSuccessDelta += dieRoll - action.AttackRoll;
             action.AttackRoll = dieRoll;
@@ -744,11 +761,6 @@ internal static class RaceFeats
 
             var rulesetHelper = helper.RulesetCharacter;
             var dieRoll = rulesetHelper.RollDie(DieType.D20, RollContext.None, false, AdvantageType.None, out _, out _);
-
-            if (dieRoll < abilityCheckData.AbilityCheckRoll)
-            {
-                yield break;
-            }
 
             abilityCheckData.AbilityCheckSuccessDelta += dieRoll - abilityCheckData.AbilityCheckRoll;
             abilityCheckData.AbilityCheckRoll = dieRoll;
@@ -838,12 +850,10 @@ internal static class RaceFeats
 
             var rulesetHelper = helper.RulesetCharacter;
             var dieRoll = rulesetHelper.RollDie(DieType.D20, RollContext.None, false, AdvantageType.None, out _, out _);
-            var savingRoll = action.SaveOutcomeDelta - saveModifier.savingThrowModifier + action.GetSaveDC() - 1;
+            var savingRoll = action.SaveOutcomeDelta - _modifier + _saveDC;
 
-            if (dieRoll < savingRoll)
-            {
-                yield break;
-            }
+            action.saveOutcomeDelta += dieRoll - savingRoll;
+            action.RolledSaveThrow = true;
 
             action.saveOutcomeDelta += dieRoll - savingRoll;
             action.RolledSaveThrow = true;
@@ -1121,8 +1131,7 @@ internal static class RaceFeats
             var battleManager =
                 ServiceRepository.GetService<IGameLocationBattleService>() as GameLocationBattleManager;
 
-            if (!actionManager ||
-                battleManager is not { IsBattleInProgress: true })
+            if (!actionManager || !battleManager)
             {
                 yield break;
             }

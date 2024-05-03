@@ -1213,11 +1213,6 @@ internal static class OtherFeats
             // ReSharper disable once ParameterTypeCanBeEnumerable.Local
             List<EffectForm> actualEffectForms)
         {
-            if (battleManager is not { IsBattleInProgress: true })
-            {
-                yield break;
-            }
-
             var effectForm = actualEffectForms
                 .FirstOrDefault(x =>
                     x.FormType == EffectForm.EffectFormType.Damage &&
@@ -1401,6 +1396,7 @@ internal static class OtherFeats
             .Create($"Feature{Name}")
             .SetGuiPresentation(Name, Category.Feat, hidden: true)
             .SetUsesFixed(ActivationTime.NoCost, RechargeRate.LongRest, 1, 3)
+            .SetShowCasting(false)
             .AddToDB();
 
         power.AddCustomSubFeatures(new CustomBehaviorLucky(power));
@@ -1417,8 +1413,31 @@ internal static class OtherFeats
     private sealed class CustomBehaviorLucky(
         // ReSharper disable once SuggestBaseTypeForParameterInConstructor
         FeatureDefinitionPower powerLucky)
-        : ITryAlterOutcomeAttack, ITryAlterOutcomeAttributeCheck, ITryAlterOutcomeSavingThrow
+        : ITryAlterOutcomeAttack, ITryAlterOutcomeAttributeCheck, ITryAlterOutcomeSavingThrow, IRollSavingThrowFinished
     {
+        private int _modifier;
+
+        private int _saveDC;
+
+        public void OnSavingThrowFinished(
+            RulesetCharacter caster,
+            RulesetCharacter defender,
+            int saveBonus,
+            string abilityScoreName,
+            BaseDefinition sourceDefinition,
+            List<TrendInfo> modifierTrends,
+            List<TrendInfo> advantageTrends,
+            int rollModifier,
+            int saveDC,
+            bool hasHitVisual,
+            ref RollOutcome outcome,
+            ref int outcomeDelta,
+            List<EffectForm> effectForms)
+        {
+            _saveDC = saveDC;
+            _modifier = saveBonus + rollModifier;
+        }
+
         public IEnumerator OnTryAlterOutcomeAttack(
             GameLocationBattleManager battleManager,
             CharacterAction action,
@@ -1430,8 +1449,7 @@ internal static class OtherFeats
             var rulesetHelper = helper.RulesetCharacter;
             var usablePower = PowerProvider.Get(powerLucky, rulesetHelper);
 
-            if (action.AttackRollOutcome is not (RollOutcome.Failure or RollOutcome.CriticalFailure) ||
-                !helper.CanReact() ||
+            if (!helper.CanReact() ||
                 rulesetHelper.GetRemainingUsesOfPower(usablePower) == 0)
             {
                 yield break;
@@ -1439,11 +1457,13 @@ internal static class OtherFeats
 
             string stringParameter;
 
-            if (helper == attacker)
+            if (helper == attacker &&
+                action.AttackRollOutcome is RollOutcome.Failure or RollOutcome.CriticalFailure)
             {
                 stringParameter = "LuckyAttack";
             }
-            else if (helper.IsOppositeSide(attacker.Side))
+            else if (helper == defender &&
+                     action.AttackRollOutcome is RollOutcome.Success or RollOutcome.CriticalSuccess)
             {
                 stringParameter = "LuckyEnemyAttack";
             }
@@ -1457,7 +1477,7 @@ internal static class OtherFeats
                 ServiceRepository.GetService<IRulesetImplementationService>() as RulesetImplementationManager;
 
             var reactionParams =
-                new CharacterActionParams(helper, ActionDefinitions.Id.PowerNoCost)
+                new CharacterActionParams(helper, ActionDefinitions.Id.PowerReaction)
                 {
                     StringParameter = stringParameter,
                     ActionModifiers = { new ActionModifier() },
@@ -1478,14 +1498,6 @@ internal static class OtherFeats
             }
 
             var dieRoll = rulesetHelper.RollDie(DieType.D20, RollContext.None, false, AdvantageType.None, out _, out _);
-
-            if ((stringParameter == "LuckyEnemyAttack" &&
-                 dieRoll >= action.AttackRoll) ||
-                (stringParameter == "LuckyAttack" &&
-                 dieRoll < action.AttackRoll))
-            {
-                yield break;
-            }
 
             action.AttackSuccessDelta += dieRoll - action.AttackRoll;
             action.AttackRoll = dieRoll;
@@ -1528,7 +1540,7 @@ internal static class OtherFeats
                 ServiceRepository.GetService<IRulesetImplementationService>() as RulesetImplementationManager;
 
             var reactionParams =
-                new CharacterActionParams(helper, ActionDefinitions.Id.PowerNoCost)
+                new CharacterActionParams(helper, ActionDefinitions.Id.PowerReaction)
                 {
                     StringParameter = "LuckyCheck",
                     ActionModifiers = { new ActionModifier() },
@@ -1549,11 +1561,6 @@ internal static class OtherFeats
             }
 
             var dieRoll = rulesetHelper.RollDie(DieType.D20, RollContext.None, false, AdvantageType.None, out _, out _);
-
-            if (dieRoll < abilityCheckData.AbilityCheckRoll)
-            {
-                yield break;
-            }
 
             abilityCheckData.AbilityCheckSuccessDelta += dieRoll - abilityCheckData.AbilityCheckRoll;
             abilityCheckData.AbilityCheckRoll = dieRoll;
@@ -1607,7 +1614,7 @@ internal static class OtherFeats
                 ServiceRepository.GetService<IRulesetImplementationService>() as RulesetImplementationManager;
 
             var reactionParams =
-                new CharacterActionParams(helper, ActionDefinitions.Id.PowerNoCost)
+                new CharacterActionParams(helper, ActionDefinitions.Id.PowerReaction)
                 {
                     StringParameter = "LuckySaving",
                     StringParameter2 = "UseLuckySavingDescription".Formatted(
@@ -1630,12 +1637,7 @@ internal static class OtherFeats
             }
 
             var dieRoll = rulesetHelper.RollDie(DieType.D20, RollContext.None, false, AdvantageType.None, out _, out _);
-            var savingRoll = action.SaveOutcomeDelta - saveModifier.savingThrowModifier + action.GetSaveDC() - 1;
-
-            if (dieRoll < savingRoll)
-            {
-                yield break;
-            }
+            var savingRoll = action.SaveOutcomeDelta - _modifier + _saveDC;
 
             action.saveOutcomeDelta += dieRoll - savingRoll;
             action.RolledSaveThrow = true;
@@ -1828,8 +1830,7 @@ internal static class OtherFeats
             var battleManager =
                 ServiceRepository.GetService<IGameLocationBattleService>() as GameLocationBattleManager;
 
-            if (!actionManager ||
-                battleManager is not { IsBattleInProgress: true })
+            if (!actionManager || !battleManager)
             {
                 yield break;
             }

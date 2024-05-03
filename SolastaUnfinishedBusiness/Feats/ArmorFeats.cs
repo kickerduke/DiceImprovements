@@ -121,6 +121,7 @@ internal static class ArmorFeats
             .Create($"Power{Name}")
             .SetGuiPresentation(Name, Category.Feat)
             .SetUsesFixed(ActivationTime.NoCost)
+            .SetShowCasting(false)
             .AddToDB();
 
         powerShieldTechniques.AddCustomSubFeatures(
@@ -149,11 +150,6 @@ internal static class ArmorFeats
             bool firstTarget,
             bool criticalHit)
         {
-            if (battleManager is not { IsBattleInProgress: true })
-            {
-                yield break;
-            }
-
             var rulesetDefender = defender.RulesetCharacter;
 
             if (!defender.CanReact() || !rulesetDefender.IsWearingShield())
@@ -213,11 +209,14 @@ internal static class ArmorFeats
             int outcomeDelta,
             List<EffectForm> effectForms)
         {
-            if (abilityScoreName == AttributeDefinitions.Dexterity && defender.IsWearingShield())
+            if (abilityScoreName != AttributeDefinitions.Dexterity || !defender.IsWearingShield())
             {
-                modifierTrends.Add(
-                    new TrendInfo(2, FeatureSourceType.Power, powerShieldTechniques.Name, powerShieldTechniques));
+                return;
             }
+
+            saveBonus += 2;
+            modifierTrends.Add(
+                new TrendInfo(2, FeatureSourceType.Power, powerShieldTechniques.Name, powerShieldTechniques));
         }
     }
 }

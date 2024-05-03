@@ -602,7 +602,7 @@ public static class CharacterActionMagicEffectPatcher
 
             if (needToRollDie)
             {
-                //PATCH: supports `IMagicalAttackInitiatedOnMe`, `IMagicEffectAttackInitiatedByMe`
+                //PATCH: supports `IMagicalAttackInitiatedOnMe`
                 foreach (var magicEffectInitiatedOnMe in target.RulesetActor
                              .GetSubFeaturesByType<IMagicEffectAttackInitiatedOnMe>())
                 {
@@ -616,10 +616,27 @@ public static class CharacterActionMagicEffectPatcher
                         checkMagicalAttackDamage);
                 }
 
+                //PATCH: supports `IMagicEffectAttackInitiatedByMe`
                 foreach (var magicEffectInitiatedByMe in actingCharacter.RulesetActor
                              .GetSubFeaturesByType<IMagicEffectAttackInitiatedByMe>())
                 {
                     yield return magicEffectInitiatedByMe.OnMagicEffectAttackInitiatedByMe(
+                        __instance,
+                        activeEffect,
+                        actingCharacter,
+                        target,
+                        attackModifier,
+                        actualEffectForms,
+                        firstTarget,
+                        checkMagicalAttackDamage);
+                }
+
+                if (activeEffect is { SourceDefinition: SpellDefinition spellDefinition })
+                {
+                    var magicEffectInitiatedByMe =
+                        spellDefinition.GetFirstSubFeatureOfType<IMagicEffectAttackInitiatedByMe>();
+
+                    yield return magicEffectInitiatedByMe?.OnMagicEffectAttackInitiatedByMe(
                         __instance,
                         activeEffect,
                         actingCharacter,
@@ -664,6 +681,13 @@ public static class CharacterActionMagicEffectPatcher
                     }
 
                     // END PATCH
+                }
+
+                //PATCH: support for `ITryAlterOutcomeAttack`
+                foreach (var tryAlterOutcomeSavingThrow in TryAlterOutcomeAttack.Handler(
+                             battleManager, __instance, actingCharacter, target, attackModifier))
+                {
+                    yield return tryAlterOutcomeSavingThrow;
                 }
 
                 __instance.isResultingActionSpendPowerWithMotionForm = false;
@@ -825,6 +849,13 @@ public static class CharacterActionMagicEffectPatcher
                             attackModifier,
                             !needToRollDie,
                             hasBorrowedLuck);
+                    }
+                    
+                    //PATCH: support for `ITryAlterOutcomeSavingThrow`
+                    foreach (var tryAlterOutcomeSavingThrow in TryAlterOutcomeSavingThrow.Handler(
+                                 battleManager, __instance, actingCharacter, target, attackModifier, false, hasBorrowedLuck))
+                    {
+                        yield return tryAlterOutcomeSavingThrow;
                     }
                 }
             }
